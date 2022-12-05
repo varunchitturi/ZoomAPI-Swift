@@ -8,10 +8,7 @@ final class ZoomAPITests: XCTestCase {
         // Use XCTAssert and related functions to verify your tests produce the correct
         // results.
         
-        let app = Application()
-        let client = ZoomClient(app.client, clientID: "", clientSecret: "")
-        let response = try await client.getToken(code: "")
-        print(response)
+        let uri = URI("https://zoom.us/oauth/")
         // XCTAssertEqual(ZoomAPI().text, "Hello, World!")
     }
     

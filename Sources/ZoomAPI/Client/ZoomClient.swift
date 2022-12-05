@@ -12,7 +12,7 @@ open class ZoomClient {
     
     static let apiURL = URI(string: "https://api.zoom.us/v2/")
         
-    let client: Vapor.Client
+    let client: Client
     let clientID: String
     let clientSecret: String
     
