@@ -9,9 +9,9 @@ import Foundation
 
 extension ZoomClient {
     public struct BearerTokenSet {
-        let accessToken: String
-        let refreshToken: String
-        let expireDate: Date
-        let scope: String
+        public let accessToken: String
+        public let refreshToken: String
+        public let expireDate: Date
+        public let scope: String
     }
 }
