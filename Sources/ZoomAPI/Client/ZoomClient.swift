@@ -16,7 +16,7 @@ open class ZoomClient {
     let clientID: String
     let clientSecret: String
     
-    init(_ client: Client, clientID: String, clientSecret: String) {
+    public init(_ client: Client, clientID: String, clientSecret: String) {
         self.client = client
         self.clientID = clientID
         self.clientSecret = clientSecret

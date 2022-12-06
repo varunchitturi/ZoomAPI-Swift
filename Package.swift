@@ -15,12 +15,14 @@ let package = Package(
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
             name: "ZoomAPI",
-            targets: ["ZoomAPI"]),
+            targets: ["ZoomAPI"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
         .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0"),
+        .package(url: "https://github.com/phimage/Erik.git", from: "5.1.0"),
+        
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -28,8 +30,14 @@ let package = Package(
         .target(
             name: "ZoomAPI",
             dependencies: [.product(name: "Vapor", package: "vapor")]),
+        .executableTarget(
+            name: "RefreshToken",
+            dependencies: ["ZoomAPI", .product(name: "Vapor", package: "vapor")]),
         .testTarget(
             name: "ZoomAPITests",
-            dependencies: ["ZoomAPI"]),
+            dependencies: ["ZoomAPI",
+                .product(name: "Erik", package: "Erik"),
+                .product(name: "XCTVapor", package: "vapor"),
+            ]),
     ]
 )
