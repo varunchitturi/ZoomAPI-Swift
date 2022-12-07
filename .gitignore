@@ -11,3 +11,4 @@ DerivedData/
 *.sqlite
 *.resolved
 *.xcsettings
+/.swiftpm/xcode/xcshareddata/
