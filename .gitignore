@@ -10,3 +10,4 @@ DerivedData/
 /*.xcscheme
 *.sqlite
 *.resolved
+*.xcsettings
