@@ -54,7 +54,7 @@ extension ZoomClient {
         )
     }
     
-    public func refreshToken(for tokenSet: BearerTokenSet) async throws -> BearerTokenSet {
+    public func refreshAccessToken(for tokenSet: BearerTokenSet) async throws -> BearerTokenSet {
         let response = try await client.post(ZoomClient.OAUTHEndpoint.appending("token")) { req in
             req.headers = tokenHeaders
             try req.query.encode(["grant_type": "refresh_token", "refresh_token": tokenSet.refreshToken])
