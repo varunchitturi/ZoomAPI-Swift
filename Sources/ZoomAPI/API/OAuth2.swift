@@ -10,7 +10,7 @@ import Vapor
 
 extension ZoomClient {
     
-    private static let OAUTHEndpoint = URI("https://zoom.us/oauth/")
+    private static let oauthEndpoint = URI("https://zoom.us/oauth/")
     
     private var tokenHeaders: HTTPHeaders {
         var headers = HTTPHeaders()
@@ -19,22 +19,22 @@ extension ZoomClient {
         return headers
     }
     
-    private var tokenResponseDecoder: JSONDecoder {
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        return decoder
-    }
-    
     private struct TokenResponse: Content {
-        var accessToken: String
-        var tokenType: String
-        var refreshToken: String
-        var expiresIn: Double
-        var scope: String
+        let accessToken: String
+        let tokenType: String
+        let refreshToken: String
+        let expiresIn: Double
+        let scope: String
     }
     
+    /// Get's a set of bearer credentials using an authorization code sent to the redirect URI.
+    /// - Parameters:
+    ///   - code: The code given when a user authorizes your app
+    ///   - redirectURI: The URI that Zoom redirects too with the code when an app is authorized
+    ///   - codeVerifier: An optional String used to verify the code if using PKCE
+    /// - Returns: A `BearerTokenSet` containing the user's credentials
     public func getToken(code: String, redirectURI: URI, codeVerifier: String? = nil) async throws -> BearerTokenSet {
-        let response = try await client.post(ZoomClient.OAUTHEndpoint.appending("token")) { req in
+        let response = try await client.post(ZoomClient.oauthEndpoint.appending("token")) { req in
             req.headers = tokenHeaders
             var body = ["code": code,
                         "grant_type": "authorization_code",
@@ -46,7 +46,7 @@ extension ZoomClient {
             try req.query.encode(body)
         }
         
-        let tokenResponse = try response.content.decode(TokenResponse.self, using: tokenResponseDecoder)
+        let tokenResponse = try response.content.decode(TokenResponse.self, using: responseDecoder)
         return BearerTokenSet(accessToken: tokenResponse.accessToken,
                               refreshToken: tokenResponse.refreshToken,
                               expireDate: .init(timeIntervalSinceNow: tokenResponse.expiresIn),
@@ -54,13 +54,17 @@ extension ZoomClient {
         )
     }
     
+    /// Refreshes an expired access token.
+    /// - Note: A new access token **and** refresh token will be provided
+    /// - Parameter tokenSet: The bearer token set for the user
+    /// - Returns: A `BearerTokenSet` with refreshed credentials
     public func refreshAccessToken(for tokenSet: BearerTokenSet) async throws -> BearerTokenSet {
-        let response = try await client.post(ZoomClient.OAUTHEndpoint.appending("token")) { req in
+        let response = try await client.post(ZoomClient.oauthEndpoint.appending("token")) { req in
             req.headers = tokenHeaders
             try req.query.encode(["grant_type": "refresh_token", "refresh_token": tokenSet.refreshToken])
         }
         
-        let tokenResponse = try response.content.decode(TokenResponse.self, using: tokenResponseDecoder)
+        let tokenResponse = try response.content.decode(TokenResponse.self, using: responseDecoder)
         return BearerTokenSet(accessToken: tokenResponse.accessToken,
                               refreshToken: tokenResponse.refreshToken,
                               expireDate: .init(timeIntervalSinceNow: tokenResponse.expiresIn),
@@ -69,12 +73,15 @@ extension ZoomClient {
         
     }
     
+    /// Revokes a user's access and refresh token.
+    /// - Note: The user must manually reauthorize the Zoom App after the tokens are revoked
+    /// - Parameter tokenSet: The bearer token set for the user
     public func revokeToken(for tokenSet: BearerTokenSet) async throws {
-        _ = try await client.post(ZoomClient.OAUTHEndpoint.appending("revoke")) { req in
+        let response = try await client.post(ZoomClient.oauthEndpoint.appending("revoke")) { req in
             req.headers = tokenHeaders
             try req.query.encode(["token": tokenSet.accessToken])
         }
-        
+        print(response.status)
     }
     
 }

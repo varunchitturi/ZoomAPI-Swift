@@ -8,17 +8,12 @@ import FluentSQLiteDriver
 final class OAuthTests: APITestCase {
 
     func testRefreshAccessToken() async throws {
+        print(tokenSet.refreshToken)
         do {
-            let tokenSet = try await client.refreshAccessToken(for: ZoomClient.BearerTokenSet(accessToken: "",
-                                                                                              refreshToken: refreshToken,
-                                                                                              expireDate: .now,
-                                                                                              scope: ""))
-            let refreshToken = try await PersistentKeyValue.find("ZM_REFRESH_TOKEN", on: app.db)
-            refreshToken?.value = tokenSet.refreshToken
-            try await refreshToken?.update(on: app.db)
+            try await refreshTokenSet(refreshToken: tokenSet.refreshToken)
         }
         catch {
-            XCTAssertNoThrow(try { throw error }(), "Zoom Refresh Token expired or not found. Please run the RefreshToken executable.")
+            XCTAssertNoThrow(try { throw error }(), "Test may have failed because Zoom Refresh Token is expired or not found. Please run the RefreshToken executable.")
         }
         
     }

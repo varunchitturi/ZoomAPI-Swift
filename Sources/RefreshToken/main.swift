@@ -11,6 +11,8 @@ import Cocoa
 import Fluent
 import FluentSQLiteDriver
 
+precondition(FileManager.default.currentDirectoryPath.pathComponents.last?.description == "TestData", "Please set the current directory in the RefreshToken scheme to the TestData folder")
+
 let app = Application(.production)
 let clientID = Environment.get("ZM_CLIENT_ID")!
 let clientSecret = Environment.get("ZM_CLIENT_SECRET")!

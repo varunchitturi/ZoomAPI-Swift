@@ -15,17 +15,29 @@ class APITestCase: XCTestCase {
     let app = Application()
     let clientID = Environment.get("ZM_CLIENT_ID")!
     let clientSecret = Environment.get("ZM_CLIENT_SECRET")!
-    var refreshToken: String!
+    private(set) var tokenSet: ZoomClient.BearerTokenSet!
+    
     
     override func setUp() async throws {
         let testDataPath = URL(fileURLWithPath: #file).pathComponents.dropLast().joined(by: "/") + "/TestData"
         app.databases.use(.sqlite(.file("\(testDataPath)/db.sqlite")), as: .sqlite)
         app.migrations.add(PersistentKeyValueMigration())
         try await app.autoMigrate()
-        refreshToken = try await PersistentKeyValue.find("ZM_REFRESH_TOKEN", on: app.db)?.value
-        XCTAssertNotNil(refreshToken, "Zoom Refresh Token not found. Please run the RefreshToken executable.")
+        let refreshToken = try await PersistentKeyValue.find("ZM_REFRESH_TOKEN", on: app.db)?.value ?? ""
+        XCTAssertNotEqual(refreshToken, "", "Zoom Refresh Token not found. Please run the RefreshToken executable.")
+        try await refreshTokenSet(refreshToken: refreshToken)
     }
     
+    func refreshTokenSet(refreshToken: String) async throws {
+        tokenSet = try await client.refreshAccessToken(for: ZoomClient.BearerTokenSet(accessToken: "",
+                                                                                          refreshToken: refreshToken,
+                                                                                          expireDate: .now,
+                                                                                          scope: ""))
+        
+        let refreshToken = try await PersistentKeyValue.find("ZM_REFRESH_TOKEN", on: app.db)
+        refreshToken?.value = tokenSet.refreshToken
+        try await refreshToken?.update(on: app.db)
+    }
     
     var client: ZoomClient {
         ZoomClient(app.client, clientID: clientID, clientSecret: clientSecret)

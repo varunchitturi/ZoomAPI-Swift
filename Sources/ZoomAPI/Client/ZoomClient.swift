@@ -12,9 +12,15 @@ open class ZoomClient {
     
     static let apiURL = URI(string: "https://api.zoom.us/v2/")
         
-    let client: Client
+    public var client: Client
     let clientID: String
     let clientSecret: String
+    
+    let responseDecoder: JSONDecoder = {
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        return decoder
+    }()
     
     public init(_ client: Client, clientID: String, clientSecret: String) {
         self.client = client
