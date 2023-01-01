@@ -20,18 +20,18 @@ public struct MeetingInfo: Content {
         let status: String
     }
     
-    let assistantID: String
+    let assistantId: String
     let hostEmail: String
-    let hostID: String
+    let hostId: String
     let id: UInt64
     let uuid: String
     let createdAt: Date
     let encryptedPassword: String
     let h323Password: String
-    let joinURL: URL
-    let occurrences: [Occurrence]
-    let pmi: String
-    let startURL: URL
+    let joinUrl: URL
+    let occurrences: [Occurrence]?
+    let pmi: String?
+    let startUrl: URL
     let status: Status
 }
 
@@ -69,6 +69,7 @@ public struct Meeting: Content {
         case instant = 1
         case scheduled = 2
         case recurringNoFixed = 3
+        case personal = 4
         case recurringFixed = 8
     }
     

@@ -9,6 +9,6 @@ import Foundation
 
 extension ZoomClient {
     
-    static let usersEndpoint = ZoomClient.apiURL.appending("users")
+    static let usersEndpoint = ZoomClient.apiUrl.appending("users")
     
 }

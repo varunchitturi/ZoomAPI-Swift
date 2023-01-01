@@ -12,8 +12,7 @@ import Vapor
 
 final class MeetingTests: APITestCase {
     func testGetMeeting() async throws {
-        let meeting = Meeting(type: .instant)
-        try await client.createMeeting(tokenSet, meeting: meeting)
+        try await client.getMeeting(tokenSet, meetingId: 4398410090)
     }
 
 }

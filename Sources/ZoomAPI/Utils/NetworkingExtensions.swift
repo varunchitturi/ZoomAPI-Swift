@@ -17,3 +17,6 @@ extension URI {
     }
 }
 
+extension JSONDecoder {
+    
+}

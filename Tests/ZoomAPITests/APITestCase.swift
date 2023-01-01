@@ -13,7 +13,7 @@ import Vapor
 class APITestCase: XCTestCase {
     
     let app = Application()
-    let clientID = Environment.get("ZM_CLIENT_ID")!
+    let clientId = Environment.get("ZM_CLIENT_ID")!
     let clientSecret = Environment.get("ZM_CLIENT_SECRET")!
     private(set) var tokenSet: ZoomClient.BearerTokenSet!
     
@@ -41,7 +41,7 @@ class APITestCase: XCTestCase {
     }
     
     var client: ZoomClient {
-        ZoomClient(app.client, clientID: clientID, clientSecret: clientSecret)
+        ZoomClient(app.client, clientId: clientId, clientSecret: clientSecret)
     }
     
     override func tearDown() {

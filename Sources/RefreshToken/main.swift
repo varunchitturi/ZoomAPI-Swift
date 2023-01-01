@@ -14,17 +14,17 @@ import FluentSQLiteDriver
 precondition(FileManager.default.currentDirectoryPath.pathComponents.last?.description == "TestData", "Please set the current directory in the RefreshToken scheme to the TestData folder")
 
 let app = Application(.production)
-let clientID = Environment.get("ZM_CLIENT_ID")!
+let clientId = Environment.get("ZM_CLIENT_ID")!
 let clientSecret = Environment.get("ZM_CLIENT_SECRET")!
-let zoomClient = ZoomClient(app.client, clientID: clientID, clientSecret: clientSecret)
+let zoomClient = ZoomClient(app.client, clientId: clientId, clientSecret: clientSecret)
 let codeRoute: PathComponent = "code"
 let port = app.http.server.configuration.port
-let redirectURI = URI("http://localhost:\(port)/\(codeRoute)")
+let redirectUri = URI("http://localhost:\(port)/\(codeRoute)")
 
 
 let route = app.get(codeRoute) { req async throws in
     let code: String = req.query["code"]!
-    let tokenSet = try await zoomClient.getToken(code: code, redirectURI: redirectURI)
+    let tokenSet = try await zoomClient.getToken(code: code, redirectUri: redirectUri)
     let tokenStorePath = FileManager.default.currentDirectoryPath.appending("/db.sqlite")
     if FileManager.default.fileExists(atPath: tokenStorePath) {
         let tableName = "persistent_values"
@@ -48,10 +48,10 @@ let runLoop = Task.detached {
     try app.run()
 }
 
-var baseURL = URLComponents(string: "https://zoom.us/oauth/authorize")!
-baseURL.queryItems = [.init(name: "response_type", value: "code"),
-                      .init(name: "client_id", value: clientID),
-                      .init(name: "redirect_uri", value: redirectURI.description)]
-NSWorkspace.shared.open(baseURL.url!)
+var baseUrl = URLComponents(string: "https://zoom.us/oauth/authorize")!
+baseUrl.queryItems = [.init(name: "response_type", value: "code"),
+                      .init(name: "client_id", value: clientId),
+                      .init(name: "redirect_uri", value: redirectUri.description)]
+NSWorkspace.shared.open(baseUrl.url!)
 
 try await runLoop.value

@@ -10,10 +10,10 @@ import Vapor
 
 open class ZoomClient {
     
-    static let apiURL = URI(string: "https://api.zoom.us/v2/")
+    static let apiUrl = URI(string: "https://api.zoom.us/v2/")
         
     public var client: Client
-    let clientID: String
+    let clientId: String
     let clientSecret: String
     
     let responseDecoder: JSONDecoder = {
@@ -30,9 +30,9 @@ open class ZoomClient {
         return encoder
     }()
     
-    public init(_ client: Client, clientID: String, clientSecret: String) {
+    public init(_ client: Client, clientId: String, clientSecret: String) {
         self.client = client
-        self.clientID = clientID
+        self.clientId = clientId
         self.clientSecret = clientSecret
     }
 
