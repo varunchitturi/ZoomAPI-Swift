@@ -73,6 +73,26 @@ extension ZoomClient {
         }
     }
     
+    public func deleteMeeting(_ credentials: BearerTokenSet, meetingId: UInt64, occurrenceId: String? = nil, notifyHosts: Bool = true, notifyRegistrants: Bool = false) async throws {
+        
+        _ = try await client.delete(ZoomClient.meetingsEndpoint.appending(meetingId.description)) { req in
+            req.headers.bearerAuthorization = credentials.headers
+            struct DeleteQuery: Content {
+                let notifyHosts: Bool
+                let notifyRegistrants: Bool
+                let occurrenceId: String?
+                
+                enum CodingKeys: String, CodingKey {
+                    case notifyHosts = "schedule_for_reminder"
+                    case notifyRegistrants = "cancel_meeting_reminder"
+                    case occurrenceId = "occurrence_id"
+                }
+            }
+            try req.query.encode(DeleteQuery(notifyHosts: notifyHosts, notifyRegistrants: notifyRegistrants, occurrenceId: occurrenceId))
+        }
+        
+    }
+    
     
     
 }

@@ -19,5 +19,10 @@ final class MeetingTests: APITestCase {
     func testListMeetings() async throws {
         try await client.listMeetings(tokenSet)
     }
+    
+    func testDeleteMeeting() async throws {
+        try await client.deleteMeeting(tokenSet, meetingId: 86189918781)
+        
+    }
 
 }
