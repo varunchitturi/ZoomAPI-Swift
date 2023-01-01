@@ -81,7 +81,6 @@ extension ZoomClient {
             req.headers = tokenHeaders
             try req.query.encode(["token": tokenSet.accessToken])
         }
-        print(response.status)
     }
     
 }

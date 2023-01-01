@@ -19,7 +19,15 @@ open class ZoomClient {
     let responseDecoder: JSONDecoder = {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
+        decoder.dateDecodingStrategy = .iso8601
         return decoder
+    }()
+    
+    let requestEncoder: JSONEncoder = {
+        let encoder  = JSONEncoder()
+        encoder.keyEncodingStrategy = .convertToSnakeCase
+        encoder.dateEncodingStrategy = .iso8601
+        return encoder
     }()
     
     public init(_ client: Client, clientID: String, clientSecret: String) {

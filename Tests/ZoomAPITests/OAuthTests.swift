@@ -1,14 +1,9 @@
 import XCTest
-import Vapor
-import Foundation
-import Fluent
-import FluentSQLiteDriver
 @testable import ZoomAPI
 
 final class OAuthTests: APITestCase {
 
     func testRefreshAccessToken() async throws {
-        print(tokenSet.refreshToken)
         do {
             try await refreshTokenSet(refreshToken: tokenSet.refreshToken)
         }

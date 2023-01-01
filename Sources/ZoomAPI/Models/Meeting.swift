@@ -8,32 +8,262 @@
 import Foundation
 import Vapor
 
-struct Meeting: Content {
-    enum Status: String {
-        case scheduled
-        case live
-        case upcoming
-        case previous
+public struct MeetingInfo: Content {
+    enum Status: String, Content {
+        case waiting, started
     }
-    enum MeetingType: Int, Codable {
+    
+    struct Occurrence: Content {
+        let duration: String
+        let id: String
+        let startTime: String
+        let status: String
+    }
+    
+    let assistantID: String
+    let hostEmail: String
+    let hostID: String
+    let id: UInt64
+    let uuid: String
+    let createdAt: Date
+    let encryptedPassword: String
+    let h323Password: String
+    let joinURL: URL
+    let occurrences: [Occurrence]
+    let pmi: String
+    let startURL: URL
+    let status: Status
+}
+
+public struct Meeting: Content {
+    
+    let agenda: String?
+    let duration: UInt64?
+    let password: String?
+    let preSchedule: Bool
+    let recurrence: Recurrence?
+    let settings: Settings
+    let startTime: Date
+    let timezone: String
+    let topic: String?
+    let trackingFields: [TrackingField]?
+    let type: MeetingType
+    
+    init(agenda: String? = nil, duration: UInt64 = 60, password: String? = nil, preSchedule: Bool = false, recurrence: Meeting.Recurrence? = nil, settings: Meeting.Settings = Settings(), startTime: Date = .now, timezone: String = TimeZone.current.identifier, topic: String? = nil, trackingFields: [Meeting.TrackingField]? = nil, type: Meeting.MeetingType) {
+        self.agenda = agenda
+        self.duration = duration
+        self.password = password
+        self.preSchedule = preSchedule
+        self.recurrence = recurrence
+        self.settings = settings
+        self.startTime = startTime
+        self.timezone = timezone
+        self.topic = topic
+        self.trackingFields = trackingFields
+        self.type = type
+    }
+    
+    enum MeetingType: Int, Content {
         case instant = 1
         case scheduled = 2
         case recurringNoFixed = 3
         case recurringFixed = 8
     }
     
-    let agenda: String
-    let createdAt: Date
-    let duration: Int
-    let hostID: String
-    let id: String
-    let joinURL: URL
-    let pmi: String?
-    let startTime: Date
-    let timezone: String
-    let topic: String
-    let type: MeetingType
-    let uuid: String
+    struct Recurrence: Content {
+        let endTime: Date
+        let endTimes: Int
+        let monthlyDay: Int
+        let monthlyWeek: Int
+        let repeatInterval: Int
+        let type: RecurrenceType
+        private let weeklyDays: String
+        
+        var weeklyDayList: Set<WeekDay> {
+            var days = Set<WeekDay>()
+            weeklyDays.split(separator: ",").forEach { day in
+                if let dayNumber = Int(String(day)), let day = WeekDay.init(rawValue: dayNumber) {
+                    days.insert(day)
+                }
+            }
+            return days
+        }
+        
+        enum RecurrenceType: Int, Content {
+            case daily = 1
+            case weekly = 2
+            case monthly = 3
+        }
+        
+        enum WeekDay: Int, Content {
+            case sunday = 1, monday = 2, tuesday = 3, wednesday = 4, thursday = 5, friday = 6, saturday = 7
+        }
+    }
     
+    public struct Settings: Content {
+        init(allowMultipleDevices: Bool = false, alternativeHosts: [String] = [], alternativeHostsEmailNotification: Bool = true, approvalType: Meeting.Settings.ApprovalType = .manual, approvedOrDeniedCountriesOrRegions: Meeting.Settings.CountrySetting = .init(enabled: false, countries: [], method: .deny), audio: Meeting.Settings.Audio = .voip, authenticationDomains: [String] = [], authenticationExceptions: [Meeting.Settings.AuthenticationException]? = nil, authenticationOption: String? = nil, autoRecording: Meeting.Settings.RecordingType = .none, breakoutRoom: Meeting.Settings.BreakoutRoomSetting = .init(enable: false, rooms: []), calendarType: Meeting.Settings.CalendarType? = nil, closeRegistration: Bool = false, contactEmail: String? = nil, contactName: String? = nil, encryptionType: Meeting.Settings.EncryptionType = .enhanced, focusMode: Bool = false, globalDialInCountries: [String]? = nil, hostVideo: Bool = false, jbhTime: Int = 0, joinBeforeHost: Bool = false, languageInterpretation: Meeting.Settings.LanguageSetting? = nil, meetingAuthentication: Bool = false, meetingInvitees: [String]? = nil, muteUponEntry: Bool = false, participantVideo: Bool = false, privateMeeting: Bool = false, registrantsConfirmationEmail: Bool = true, registrantsEmailNotification: Bool = true, registrationType: Meeting.Settings.RegistrationType? = nil, showShareButton: Bool = false, usePMI: Bool = false, waitingRoom: Bool = false, watermark: Bool = false, hostSaveVideoOrder: Bool = false, alternativeHostUpdatePolls: Bool = false) {
+            self.allowMultipleDevices = allowMultipleDevices
+            self.alternativeHosts = alternativeHosts.joined(separator: ";")
+            self.alternativeHostsEmailNotification = alternativeHostsEmailNotification
+            self.approvalType = approvalType
+            self.approvedOrDeniedCountriesOrRegions = approvedOrDeniedCountriesOrRegions
+            self.audio = audio
+            self.authenticationDomains = authenticationDomains.joined(separator: ",")
+            self.authenticationExceptions = authenticationExceptions
+            self.authenticationOption = authenticationOption
+            self.autoRecording = autoRecording
+            self.breakoutRoom = breakoutRoom
+            self.calendarType = calendarType
+            self.closeRegistration = closeRegistration
+            self.contactEmail = contactEmail
+            self.contactName = contactName
+            self.encryptionType = encryptionType
+            self.focusMode = focusMode
+            self.globalDialInCountries = globalDialInCountries
+            self.hostVideo = hostVideo
+            self.jbhTime = jbhTime
+            self.joinBeforeHost = joinBeforeHost
+            self.languageInterpretation = languageInterpretation
+            self.meetingAuthentication = meetingAuthentication
+            self.meetingInvitees = meetingInvitees
+            self.muteUponEntry = muteUponEntry
+            self.participantVideo = participantVideo
+            self.privateMeeting = privateMeeting
+            self.registrantsConfirmationEmail = registrantsConfirmationEmail
+            self.registrantsEmailNotification = registrantsEmailNotification
+            self.registrationType = registrationType
+            self.showShareButton = showShareButton
+            self.usePMI = usePMI
+            self.waitingRoom = waitingRoom
+            self.watermark = watermark
+            self.hostSaveVideoOrder = hostSaveVideoOrder
+            self.alternativeHostUpdatePolls = alternativeHostUpdatePolls
+        }
+         
+        
+        /// Whether to allow attendees to join a meeting from multiple devices. This setting is only applied to meetings with registration enabled.
+        let allowMultipleDevices: Bool
+        
+        private let alternativeHosts: String
+        
+        var alternativeHostList: [String] {
+            alternativeHosts.split(separator: ";").map({String($0)})
+        }
+        
+        let alternativeHostsEmailNotification: Bool
+        let approvalType: ApprovalType
+        let approvedOrDeniedCountriesOrRegions: CountrySetting
+        let audio: Audio
+        
+        private let authenticationDomains: String
+        
+        var authenticationDomainList: [String] {
+            authenticationDomains.split(separator: ",").map({String($0)})
+        }
+        
+        
+        let authenticationExceptions: [AuthenticationException]?
+        let authenticationOption: String?
+        let autoRecording: RecordingType
+        let breakoutRoom: BreakoutRoomSetting
+        let calendarType: CalendarType?
+        let closeRegistration: Bool
+        let contactEmail: String?
+        let contactName: String?
+        let encryptionType: EncryptionType
+        let focusMode: Bool
+        let globalDialInCountries: [String]?
+        let hostVideo: Bool
+        let jbhTime: Int
+        let joinBeforeHost: Bool
+        let languageInterpretation: LanguageSetting?
+        let meetingAuthentication: Bool
+        let meetingInvitees: [String]?
+        let muteUponEntry: Bool
+        let participantVideo: Bool
+        let privateMeeting: Bool
+        let registrantsConfirmationEmail: Bool
+        let registrantsEmailNotification: Bool
+        let registrationType: RegistrationType?
+        let showShareButton: Bool
+        let usePMI: Bool
+        let waitingRoom: Bool
+        let watermark: Bool
+        let hostSaveVideoOrder: Bool
+        let alternativeHostUpdatePolls: Bool
+        
+        enum CalendarType: Int, Content {
+            case outlook = 1, google = 2
+            
+        }
+        
+        enum EncryptionType: String, Content {
+            case enhanced = "enhanced_encryption"
+            case e2ee = "e2ee"
+        }
+        
+        struct LanguageSetting: Content {
+            let enable: Bool
+            let interpreters: [Interpreter]
+            
+            struct Interpreter: Content {
+                let email: String
+                let languages: String
+            }
+        }
+        
+        enum RegistrationType: Int, Content {
+            case registerOnce = 1
+            case registerEach = 2
+            case registerOnceAndSelect = 3
+        }
+        
+        
+        enum ApprovalType: Int, Content {
+            case automatic = 1
+            case manual = 2
+            case none = 3
+        }
+        
+        struct CountrySetting: Content {
+            let enabled: Bool
+            let countries: [String]
+            let method: AllowMethod
+
+            enum AllowMethod: String, Content {
+                case allow, deny
+            }
+        }
+        
+        enum RecordingType: String, Content {
+            case local, cloud, none
+        }
+        
+        struct BreakoutRoomSetting: Content {
+            let enable: Bool
+            let rooms: [BreakoutRoom]
+            
+            struct BreakoutRoom: Content {
+                let name: String
+                let participant: [String]
+            }
+        }
+        
+        enum Audio: String, Content {
+            case both, telephony, voip
+        }
+        
+        struct AuthenticationException: Content {
+            let email: String
+            let name: String
+        }
+    }
     
+    struct TrackingField: Content {
+        let field: String
+        let value: String
+        let visible: Bool
+    }
 }
+
+
