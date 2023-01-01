@@ -6,11 +6,14 @@
 //
 
 import XCTest
+import Vapor
+
 @testable import ZoomAPI
 
 final class MeetingTests: APITestCase {
     func testGetMeeting() async throws {
-        try await client.createMeeting(tokenSet, meeting: Meeting(type: .instant))
+        let meeting = Meeting(type: .instant)
+        try await client.createMeeting(tokenSet, meeting: meeting)
     }
 
 }

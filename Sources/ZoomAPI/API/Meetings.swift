@@ -17,7 +17,8 @@ extension ZoomClient {
             req.headers.contentType = .json
             try req.content.encode(meeting, using: requestEncoder)
         }
-        let meeting =  try response.content.decode(Meeting.self)
+        let meeting =  try response.content.decode(Meeting.self, using: responseDecoder)
+        print(meeting)
         return meeting
     }
     
@@ -26,7 +27,7 @@ extension ZoomClient {
         let response = try await client.get(ZoomClient.meetingsEndpoint.appending(meetingID.description)) { req in
             req.headers.bearerAuthorization = credentials.headers
         }
-        return try response.content.decode(Meeting.self)
+        return try response.content.decode(Meeting.self, using: responseDecoder)
     }
     
     
