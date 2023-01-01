@@ -41,12 +41,14 @@ extension ZoomClient {
         return (getMeetingResponse.meeting, getMeetingResponse.info)
     }
     
-    public func listMeetings(_ credentials: BearerTokenSet, userId: String = "me") async throws -> [(Meeting, MeetingInfo)] {
+    public func listMeetings(_ credentials: BearerTokenSet, filteredBy status: Meeting.Status = .scheduled, pageSize: Int = 30, nextPageToken: String? = nil, pageNumber: Int? = nil, userId: String = "me") async throws -> ([(Meeting, MeetingInfo)], String?) {
         let listMeetingsResponse = try await client.get(ZoomClient.usersEndpoint.appending(userId).appending("meetings")) { req in
             req.headers.bearerAuthorization = credentials.headers
+            try req.query.encode(["type": status.rawValue])
         }
         
         struct ListMeetingResponse: Decodable {
+            let nextPageToken: String?
             let meetings: [MeetingOverview]
             
             struct MeetingOverview: Decodable {
@@ -54,7 +56,9 @@ extension ZoomClient {
             }
         }
         
-        let meetingIds = (try listMeetingsResponse.content.decode(ListMeetingResponse.self, using: responseDecoder)).meetings.map({$0.id})
+        let decodedContent = (try listMeetingsResponse.content.decode(ListMeetingResponse.self, using: responseDecoder))
+        let meetingIds = decodedContent.meetings.map({$0.id})
+        let nextPageToken = decodedContent.nextPageToken
         
         return try await withThrowingTaskGroup(of: (Meeting, MeetingInfo).self) { group in
             meetingIds.forEach { id in
@@ -69,7 +73,7 @@ extension ZoomClient {
                 meetingDetails.append((meeting, info))
             }
             
-            return meetingDetails
+            return (meetingDetails, nextPageToken)
         }
     }
     
@@ -93,6 +97,14 @@ extension ZoomClient {
         
     }
     
+    public func updateMeeting(_ credentials: BearerTokenSet, meetingId: UInt64, meeting: Meeting, occurrenceId: String? = nil) async throws {
+        _ = try await client.patch(ZoomClient.meetingsEndpoint.appending(meetingId.description)) { req in
+            req.headers.bearerAuthorization = credentials.headers
+            req.headers.contentType = .json
+            try req.content.encode(meeting, using: requestEncoder)
+        }
+            
+    }
     
     
 }

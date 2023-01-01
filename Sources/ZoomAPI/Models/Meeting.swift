@@ -49,8 +49,9 @@ public struct Meeting: Content {
     let trackingFields: [TrackingField]?
     let createdAt: Date?
     let type: MeetingType
+    let scheduleFor: String?
     
-    init(agenda: String? = nil, duration: UInt64 = 60, password: String? = nil, preSchedule: Bool = false, recurrence: Recurrence? = nil, settings: Settings? = nil, startTime: Date? = nil, timezone: String = TimeZone.current.identifier, topic: String? = nil, trackingFields: [TrackingField]? = nil, type: Meeting.MeetingType) {
+    init(agenda: String? = nil, duration: UInt64 = 60, password: String? = nil, preSchedule: Bool = false, recurrence: Recurrence? = nil, settings: Settings? = nil, startTime: Date? = nil, timezone: String = TimeZone.current.identifier, topic: String? = nil, trackingFields: [TrackingField]? = nil, type: Meeting.MeetingType, scheduleFor: String? = nil) {
         self.agenda = agenda
         self.duration = duration
         self.password = password
@@ -63,6 +64,7 @@ public struct Meeting: Content {
         self.trackingFields = trackingFields
         self.type = type
         self.createdAt = nil
+        self.scheduleFor = scheduleFor
     }
     
     enum MeetingType: Int, Content {
@@ -71,6 +73,11 @@ public struct Meeting: Content {
         case recurringNoFixed = 3
         case personal = 4
         case recurringFixed = 8
+    }
+    
+    public enum Status: String, Content {
+        case scheduled, live, upcoming
+        case previous = "previous_meetings"
     }
     
     struct Recurrence: Content {
