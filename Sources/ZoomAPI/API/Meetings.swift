@@ -27,7 +27,7 @@ extension ZoomClient {
             req.headers.bearerAuthorization = credentials.headers
         }
         
-        struct GetMeetingResponse: Content {
+        struct GetMeetingResponse: Decodable {
             let meeting: Meeting
             let info: MeetingInfo
             
@@ -39,6 +39,38 @@ extension ZoomClient {
         
         let getMeetingResponse = try response.content.decode(GetMeetingResponse.self, using: responseDecoder)
         return (getMeetingResponse.meeting, getMeetingResponse.info)
+    }
+    
+    public func listMeetings(_ credentials: BearerTokenSet, userId: String = "me") async throws -> [(Meeting, MeetingInfo)] {
+        let listMeetingsResponse = try await client.get(ZoomClient.usersEndpoint.appending(userId).appending("meetings")) { req in
+            req.headers.bearerAuthorization = credentials.headers
+        }
+        
+        struct ListMeetingResponse: Decodable {
+            let meetings: [MeetingOverview]
+            
+            struct MeetingOverview: Decodable {
+                let id: UInt64
+            }
+        }
+        
+        let meetingIds = (try listMeetingsResponse.content.decode(ListMeetingResponse.self, using: responseDecoder)).meetings.map({$0.id})
+        
+        return try await withThrowingTaskGroup(of: (Meeting, MeetingInfo).self) { group in
+            meetingIds.forEach { id in
+                group.addTask {
+                    return try await self.getMeeting(credentials, meetingId: id)
+                }
+            }
+            
+            var meetingDetails = [(Meeting, MeetingInfo)]()
+            
+            for try await (meeting, info) in group {
+                meetingDetails.append((meeting, info))
+            }
+            
+            return meetingDetails
+        }
     }
     
     
