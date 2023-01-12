@@ -19,6 +19,7 @@ class APITestCase: XCTestCase {
     
     
     override func setUp() async throws {
+        app.http.client.configuration.proxy = .server(host: "localhost", port: 9090)
         let testDataPath = URL(fileURLWithPath: #file).pathComponents.dropLast().joined(by: "/") + "/TestData"
         app.databases.use(.sqlite(.file("\(testDataPath)/db.sqlite")), as: .sqlite)
         app.migrations.add(PersistentKeyValueMigration())
