@@ -47,6 +47,7 @@ public struct Meeting: Content {
     let trackingFields: [TrackingField]?
     let type: MeetingType
     let scheduleFor: String?
+    var info: MeetingInfo?
     
     init(agenda: String? = nil, duration: UInt64 = 60, password: String? = nil, preSchedule: Bool = false, recurrence: Recurrence? = nil, settings: Settings? = nil, startTime: Date? = nil, timezone: String = TimeZone.current.identifier, topic: String? = nil, trackingFields: [TrackingField]? = nil, type: Meeting.MeetingType, scheduleFor: String? = nil) {
         self.agenda = agenda

@@ -77,9 +77,12 @@ extension ZoomClient {
     /// - Note: The user must manually reauthorize the Zoom App after the tokens are revoked
     /// - Parameter tokenSet: The bearer token set for the user
     public func revokeToken(for tokenSet: BearerTokenSet) async throws {
-        _ = try await client.post(ZoomClient.oauthEndpoint.appending("revoke")) { req in
+        let response = try await client.post(ZoomClient.oauthEndpoint.appending("revoke")) { req in
             req.headers = tokenHeaders
             try req.query.encode(["token": tokenSet.accessToken])
+        }
+        if response.status.code >= 400 {
+            throw Abort(response.status, reason: response.description)
         }
     }
     

@@ -12,31 +12,32 @@ import Vapor
 
 final class MeetingTests: APITestCase {
     
-    var meetingsToDelete = [MeetingInfo]()
+    var meetingsToDelete = [Meeting]()
     
     func testCreateMeeting() async throws {
         let testMeeting = Meeting(type: .scheduled)
-        let (createdMeeting, createdMeetingInfo) = try await client.createMeeting(tokenSet, meeting: testMeeting)
-        meetingsToDelete.append(createdMeetingInfo)
+        let createdMeeting = try await client.createMeeting(tokenSet, meeting: testMeeting)
+        meetingsToDelete.append(createdMeeting)
         XCTAssert(Calendar.current.isDate(testMeeting.startTime, equalTo: createdMeeting.startTime, toGranularity: .second))
         XCTAssert(testMeeting.settings == createdMeeting.settings)
         XCTAssert(testMeeting.trackingFields == createdMeeting.trackingFields)
     }
     
     func testGetMeeting() async throws {
-        let (_, testMeetingInfo) = try await client.createMeeting(tokenSet, meeting: Meeting(type: .scheduled))
-        meetingsToDelete.append(testMeetingInfo)
-        let (_, meetingInfo) = try await client.getMeeting(tokenSet, meetingId: testMeetingInfo.id)
-        XCTAssert(meetingInfo.id == testMeetingInfo.id)
+        let testMeeting = try await client.createMeeting(tokenSet, meeting: Meeting(type: .scheduled))
+        meetingsToDelete.append(testMeeting)
+        let meeting = try await client.getMeeting(tokenSet, meetingId: testMeeting.info!.id)
+        XCTAssertNotNil(meeting.info)
+        XCTAssert(meeting.info?.id == testMeeting.info?.id)
     }
     
     func testListMeetings() async throws {
-        let (_, testMeetingInfo) = try await client.createMeeting(tokenSet, meeting: Meeting(type: .scheduled))
-        meetingsToDelete.append(testMeetingInfo)
+        let testMeeting = try await client.createMeeting(tokenSet, meeting: Meeting(type: .scheduled))
+        meetingsToDelete.append(testMeeting)
         var (meetingInfos, nextPageToken) = try await client.listMeetings(tokenSet)
         var meetingFound = false
         while nextPageToken != nil && meetingFound == false {
-            if meetingInfos.contains(where: {$0.id == testMeetingInfo.id}) {
+            if meetingInfos.contains(where: {$0.id == testMeeting.info?.id}) {
                 meetingFound = true
             }
             else {
@@ -47,11 +48,11 @@ final class MeetingTests: APITestCase {
     }
      
     func testDeleteMeeting() async throws {
-        let (_, testMeetingInfo) = try await client.createMeeting(tokenSet, meeting: Meeting(type: .scheduled))
-        try await client.deleteMeeting(tokenSet, meetingId: testMeetingInfo.id, notifyHosts: false)
+        let testMeeting = try await client.createMeeting(tokenSet, meeting: Meeting(type: .scheduled))
+        try await client.deleteMeeting(tokenSet, meetingId: testMeeting.info!.id, notifyHosts: false)
         var meetingNotFound = false
         do {
-            _ = try await client.getMeeting(tokenSet, meetingId: testMeetingInfo.id)
+            _ = try await client.getMeeting(tokenSet, meetingId: testMeeting.info!.id)
         }
         catch {
             meetingNotFound = true
@@ -60,17 +61,19 @@ final class MeetingTests: APITestCase {
     }
     
     func testUpdateMeeting() async throws {
-        let (createdMeeting, createdMeetingInfo) = try await client.createMeeting(tokenSet, meeting: Meeting(type: .scheduled))
-        meetingsToDelete.append(createdMeetingInfo)
-        try await client.updateMeeting(tokenSet, meetingId: createdMeetingInfo.id, meeting: Meeting(agenda: "Updated Agenda", type: .scheduled))
-        let (updatedMeeting, updatedMeetingInfo) = try await client.getMeeting(tokenSet, meetingId: createdMeetingInfo.id)
+        let createdMeeting = try await client.createMeeting(tokenSet, meeting: Meeting(type: .scheduled))
+        meetingsToDelete.append(createdMeeting)
+        try await client.updateMeeting(tokenSet, meetingId: createdMeeting.info!.id, meeting: Meeting(agenda: "Updated Agenda", type: .scheduled))
+        let updatedMeeting = try await client.getMeeting(tokenSet, meetingId: createdMeeting.info!.id)
         XCTAssert(updatedMeeting.agenda != createdMeeting.agenda && updatedMeeting.agenda == "Updated Agenda")
-        XCTAssert(createdMeetingInfo.id == updatedMeetingInfo.id)
+        XCTAssert(createdMeeting.info!.id == updatedMeeting.info!.id)
     }
     
     override func tearDown() async throws {
         for meeting in meetingsToDelete {
-            try await client.deleteMeeting(tokenSet, meetingId: meeting.id, notifyHosts: false)
+            if let id = meeting.info?.id {
+                try await client.deleteMeeting(tokenSet, meetingId: id, notifyHosts: false)
+            }
         }
         try await super.tearDown()
     }

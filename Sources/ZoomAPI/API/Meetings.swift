@@ -12,15 +12,18 @@ extension ZoomClient {
     
     static let meetingsEndpoint = ZoomClient.apiUrl.appending("meetings")
     
-    public func createMeeting(_ credentials: BearerTokenSet, userId: String = "me", meeting: Meeting) async throws -> (Meeting, MeetingInfo) {
+    public func createMeeting(_ credentials: BearerTokenSet, userId: String = "me", meeting: Meeting) async throws -> Meeting {
         let response = try await post(ZoomClient.usersEndpoint.appending(userId).appending("meetings"), content: meeting, contentType: .json, credentials: credentials)
-        return try response.content.decode((Meeting.self, MeetingInfo.self), using: responseDecoder)
+        var (meeting, meetingInfo) = try response.content.decode((Meeting.self, MeetingInfo.self), using: responseDecoder)
+        meeting.info = meetingInfo
+        return meeting
     }
     
-    
-    public func getMeeting(_ credentials: BearerTokenSet, meetingId: UInt64) async throws -> (Meeting, MeetingInfo) {
+    public func getMeeting(_ credentials: BearerTokenSet, meetingId: UInt64) async throws -> Meeting {
         let response = try await get(ZoomClient.meetingsEndpoint.appending(meetingId.description), credentials: credentials)
-        return try response.content.decode((Meeting.self, MeetingInfo.self), using: responseDecoder)
+        var (meeting, meetingInfo) = try response.content.decode((Meeting.self, MeetingInfo.self), using: responseDecoder)
+        meeting.info = meetingInfo
+        return meeting
     }
     
     public func listMeetings(_ credentials: BearerTokenSet, filteredBy status: Meeting.Status = .scheduled, pageSize: Int = 30, nextPageToken: String? = nil, pageNumber: Int? = nil, userId: String = "me") async throws -> ([MeetingInfo], String?) {
@@ -57,6 +60,4 @@ extension ZoomClient {
     public func updateMeeting(_ credentials: BearerTokenSet, meetingId: UInt64, meeting: Meeting, occurrenceId: String? = nil) async throws {
         _ = try await patch(ZoomClient.meetingsEndpoint.appending(meetingId.description), content: meeting, credentials: credentials)
     }
-    
-    
 }
