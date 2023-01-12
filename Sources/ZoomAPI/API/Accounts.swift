@@ -29,10 +29,7 @@ extension ZoomClient {
             let totalRecords: Int
         }
         
-        let response = try await client.get(ZoomClient.accountsEndpoint.appending(accountId).appending("managed_domains")) { req in
-            req.headers.bearerAuthorization = credentials.headers
-        }
-        let managedDomainsResponse = try response.content.decode(ManagedDomainsResponse.self, using: responseDecoder)
+        let managedDomainsResponse = try await get(ZoomClient.accountsEndpoint.appending(accountId).appending("managed_domains"), decoding: ManagedDomainsResponse.self, credentials: credentials)
         var domains = [String: String]()
         managedDomainsResponse.domains.forEach({domains[$0.domain] = $0.status})
         return domains

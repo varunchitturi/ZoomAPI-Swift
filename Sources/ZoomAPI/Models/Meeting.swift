@@ -20,19 +20,17 @@ public struct MeetingInfo: Content {
         let status: String
     }
     
-    let assistantId: String
-    let hostEmail: String
+    let assistantId: String?
+    let hostEmail: String?
     let hostId: String
     let id: UInt64
     let uuid: String
     let createdAt: Date
-    let encryptedPassword: String
-    let h323Password: String
     let joinUrl: URL
     let occurrences: [Occurrence]?
     let pmi: String?
-    let startUrl: URL
-    let status: Status
+    let startUrl: URL?
+    let status: Status?
 }
 
 public struct Meeting: Content {
@@ -43,11 +41,10 @@ public struct Meeting: Content {
     let preSchedule: Bool
     let recurrence: Recurrence?
     let settings: Settings
-    let startTime: Date?
+    let startTime: Date
     let timezone: String
     let topic: String?
     let trackingFields: [TrackingField]?
-    let createdAt: Date?
     let type: MeetingType
     let scheduleFor: String?
     
@@ -63,7 +60,6 @@ public struct Meeting: Content {
         self.topic = topic
         self.trackingFields = trackingFields
         self.type = type
-        self.createdAt = nil
         self.scheduleFor = scheduleFor
     }
     
@@ -80,7 +76,7 @@ public struct Meeting: Content {
         case previous = "previous_meetings"
     }
     
-    struct Recurrence: Content {
+    struct Recurrence: Content, Equatable {
         let endTime: Date
         let endTimes: Int
         let monthlyDay: Int
@@ -110,15 +106,15 @@ public struct Meeting: Content {
         }
     }
     
-    public struct Settings: Content {
-        init(allowMultipleDevices: Bool = false, alternativeHosts: [String] = [], alternativeHostsEmailNotification: Bool = true, approvalType: Meeting.Settings.ApprovalType = .manual, approvedOrDeniedCountriesOrRegions: Meeting.Settings.CountrySetting = .init(enable: false, countries: [], method: .deny), audio: Meeting.Settings.Audio = .voip, authenticationDomains: [String] = [], authenticationExceptions: [Meeting.Settings.AuthenticationException]? = nil, authenticationOption: String? = nil, autoRecording: Meeting.Settings.RecordingType = .none, breakoutRoom: Meeting.Settings.BreakoutRoomSetting = .init(enable: false, rooms: []), calendarType: Meeting.Settings.CalendarType? = nil, closeRegistration: Bool = false, contactEmail: String? = nil, contactName: String? = nil, encryptionType: Meeting.Settings.EncryptionType = .enhanced, focusMode: Bool = false, globalDialInCountries: [String]? = nil, hostVideo: Bool = false, jbhTime: Int = 0, joinBeforeHost: Bool = false, languageInterpretation: Meeting.Settings.LanguageSetting? = nil, meetingAuthentication: Bool = false, meetingInvitees: [String]? = nil, muteUponEntry: Bool = false, participantVideo: Bool = false, privateMeeting: Bool = false, registrantsConfirmationEmail: Bool = true, registrantsEmailNotification: Bool = true, registrationType: Meeting.Settings.RegistrationType? = nil, showShareButton: Bool = false, usePmi: Bool = false, waitingRoom: Bool = false, watermark: Bool = false, hostSaveVideoOrder: Bool = false, alternativeHostUpdatePolls: Bool = false) {
+    public struct Settings: Content, Equatable {
+        init(allowMultipleDevices: Bool = false, alternativeHosts: [String] = [], alternativeHostsEmailNotification: Bool = true, approvalType: Meeting.Settings.ApprovalType = .manual, approvedOrDeniedCountriesOrRegions: Meeting.Settings.CountrySetting = .init(enable: false, countries: nil, method: nil), audio: Meeting.Settings.Audio = .voip, authenticationDomains: [String]? = nil, authenticationExceptions: [Meeting.Settings.AuthenticationException]? = nil, authenticationOption: String? = nil, autoRecording: Meeting.Settings.RecordingType = .none, breakoutRoom: Meeting.Settings.BreakoutRoomSetting = .init(enable: false, rooms: nil), calendarType: Meeting.Settings.CalendarType? = nil, closeRegistration: Bool = false, contactEmail: String? = nil, contactName: String? = nil, encryptionType: Meeting.Settings.EncryptionType = .enhanced, focusMode: Bool = false, globalDialInCountries: [String]? = nil, hostVideo: Bool = false, jbhTime: Int = 0, joinBeforeHost: Bool = false, languageInterpretation: Meeting.Settings.LanguageSetting? = nil, meetingAuthentication: Bool = false, meetingInvitees: [String]? = nil, muteUponEntry: Bool = false, participantVideo: Bool = false, privateMeeting: Bool = false, registrantsConfirmationEmail: Bool = true, registrantsEmailNotification: Bool = true, registrationType: Meeting.Settings.RegistrationType? = nil, showShareButton: Bool = false, usePmi: Bool = false, waitingRoom: Bool = false, watermark: Bool = false, hostSaveVideoOrder: Bool = false, alternativeHostUpdatePolls: Bool = false) {
             self.allowMultipleDevices = allowMultipleDevices
             self.alternativeHosts = alternativeHosts.joined(separator: ";")
             self.alternativeHostsEmailNotification = alternativeHostsEmailNotification
             self.approvalType = approvalType
             self.approvedOrDeniedCountriesOrRegions = approvedOrDeniedCountriesOrRegions
             self.audio = audio
-            self.authenticationDomains = authenticationDomains.joined(separator: ",")
+            self.authenticationDomains = authenticationDomains?.joined(separator: ",")
             self.authenticationExceptions = authenticationExceptions
             self.authenticationOption = authenticationOption
             self.autoRecording = autoRecording
@@ -214,11 +210,11 @@ public struct Meeting: Content {
             case e2ee = "e2ee"
         }
         
-        struct LanguageSetting: Content {
+        struct LanguageSetting: Content, Equatable {
             let enable: Bool
             let interpreters: [Interpreter]?
             
-            struct Interpreter: Content {
+            struct Interpreter: Content, Equatable {
                 let email: String
                 let languages: String
             }
@@ -237,7 +233,7 @@ public struct Meeting: Content {
             case none = 3
         }
         
-        struct CountrySetting: Content {
+        struct CountrySetting: Content, Equatable {
             let enable: Bool
             let countries: [String]?
             let method: AllowMethod?
@@ -251,11 +247,11 @@ public struct Meeting: Content {
             case local, cloud, none
         }
         
-        struct BreakoutRoomSetting: Content {
+        struct BreakoutRoomSetting: Content, Equatable {
             let enable: Bool
             let rooms: [BreakoutRoom]?
             
-            struct BreakoutRoom: Content {
+            struct BreakoutRoom: Content, Equatable {
                 let name: String
                 let participant: [String]
             }
@@ -265,13 +261,13 @@ public struct Meeting: Content {
             case both, telephony, voip
         }
         
-        struct AuthenticationException: Content {
+        struct AuthenticationException: Content, Equatable {
             let email: String
             let name: String
         }
     }
     
-    struct TrackingField: Content {
+    struct TrackingField: Content, Equatable {
         let field: String
         let value: String
         let visible: Bool
