@@ -9,11 +9,28 @@ import Foundation
 import Vapor
 
 public struct MeetingInfo: Content {
-    enum Status: String, Content {
+    
+    internal init(assistantId: String? = nil, hostEmail: String? = nil, hostId: String, id: UInt64, uuid: String, createdAt: Date, joinUrl: URL, occurrences: [MeetingInfo.Occurrence]? = nil, pmi: String? = nil, startUrl: URL? = nil, status: MeetingInfo.Status? = nil) {
+        self.assistantId = assistantId
+        self.hostEmail = hostEmail
+        self.hostId = hostId
+        self.id = id
+        self.uuid = uuid
+        self.createdAt = createdAt
+        self.joinUrl = joinUrl
+        self.occurrences = occurrences
+        self.pmi = pmi
+        self.startUrl = startUrl
+        self.status = status
+    }
+    
+
+    
+    public enum Status: String, Content {
         case waiting, started
     }
     
-    struct Occurrence: Content {
+    public struct Occurrence: Content {
         let duration: String
         let id: String
         let startTime: String
@@ -35,15 +52,15 @@ public struct MeetingInfo: Content {
 
 public struct Meeting: Content {
     
-    let agenda: String?
-    let duration: UInt64?
-    let password: String?
+    var agenda: String?
+    var duration: UInt64?
+    var password: String?
     let preSchedule: Bool
     let recurrence: Recurrence?
-    let settings: Settings
-    let startTime: Date
+    var settings: Settings
+    var startTime: Date
     let timezone: String
-    let topic: String?
+    var topic: String?
     let trackingFields: [TrackingField]?
     let type: MeetingType
     let scheduleFor: String?
@@ -64,7 +81,7 @@ public struct Meeting: Content {
         self.scheduleFor = scheduleFor
     }
     
-    enum MeetingType: Int, Content {
+    public enum MeetingType: Int, Content {
         case instant = 1
         case scheduled = 2
         case recurringNoFixed = 3
@@ -78,22 +95,28 @@ public struct Meeting: Content {
     }
     
     struct Recurrence: Content, Equatable {
-        let endTime: Date
-        let endTimes: Int
-        let monthlyDay: Int
-        let monthlyWeek: Int
-        let repeatInterval: Int
-        let type: RecurrenceType
-        private let weeklyDays: String
+        var endTime: Date
+        var endTimes: Int
+        var monthlyDay: Int
+        var monthlyWeek: Int
+        var repeatInterval: Int
+        var type: RecurrenceType
+        private var weeklyDays: String
         
         var weeklyDayList: Set<WeekDay> {
-            var days = Set<WeekDay>()
-            weeklyDays.split(separator: ",").forEach { day in
-                if let dayNumber = Int(String(day)), let day = WeekDay.init(rawValue: dayNumber) {
-                    days.insert(day)
+            get {
+                var days = Set<WeekDay>()
+                weeklyDays.split(separator: ",").forEach { day in
+                    if let dayNumber = Int(String(day)), let day = WeekDay.init(rawValue: dayNumber) {
+                        days.insert(day)
+                    }
                 }
+                return days
             }
-            return days
+            set {
+                weeklyDays = Array(newValue).map({$0.rawValue.description}).joined(separator: ",")
+            }
+            
         }
         
         enum RecurrenceType: Int, Content {
@@ -171,47 +194,47 @@ public struct Meeting: Content {
             return authenticationDomains.split(separator: ",").map({String($0)})
         }
 
-        let authenticationExceptions: [AuthenticationException]?
-        let authenticationOption: String?
-        let autoRecording: RecordingType
-        let breakoutRoom: BreakoutRoomSetting
-        let calendarType: CalendarType?
-        let closeRegistration: Bool
-        let contactEmail: String?
-        let contactName: String?
-        let encryptionType: EncryptionType
-        let focusMode: Bool
-        let globalDialInCountries: [String]?
-        let hostVideo: Bool
-        let jbhTime: Int
-        let joinBeforeHost: Bool
-        let languageInterpretation: LanguageSetting?
-        let meetingAuthentication: Bool
-        let meetingInvitees: [String]?
-        let muteUponEntry: Bool
-        let participantVideo: Bool
-        let privateMeeting: Bool
-        let registrantsConfirmationEmail: Bool
-        let registrantsEmailNotification: Bool
-        let registrationType: RegistrationType?
-        let showShareButton: Bool
-        let usePmi: Bool
-        let waitingRoom: Bool
-        let watermark: Bool
-        let hostSaveVideoOrder: Bool
-        let alternativeHostUpdatePolls: Bool
+        var authenticationExceptions: [AuthenticationException]?
+        var authenticationOption: String?
+        var autoRecording: RecordingType
+        var breakoutRoom: BreakoutRoomSetting
+        var calendarType: CalendarType?
+        var closeRegistration: Bool
+        var contactEmail: String?
+        var contactName: String?
+        var encryptionType: EncryptionType
+        var focusMode: Bool
+        var globalDialInCountries: [String]?
+        var hostVideo: Bool
+        var jbhTime: Int
+        var joinBeforeHost: Bool
+        var languageInterpretation: LanguageSetting?
+        var meetingAuthentication: Bool
+        var meetingInvitees: [String]?
+        var muteUponEntry: Bool
+        var participantVideo: Bool
+        var privateMeeting: Bool
+        var registrantsConfirmationEmail: Bool
+        var registrantsEmailNotification: Bool
+        var registrationType: RegistrationType?
+        var showShareButton: Bool
+        var usePmi: Bool
+        var waitingRoom: Bool
+        var watermark: Bool
+        var hostSaveVideoOrder: Bool
+        var alternativeHostUpdatePolls: Bool
         
-        enum CalendarType: Int, Content {
+        public enum CalendarType: Int, Content {
             case outlook = 1, google = 2
             
         }
         
-        enum EncryptionType: String, Content {
+        public enum EncryptionType: String, Content {
             case enhanced = "enhanced_encryption"
             case e2ee = "e2ee"
         }
         
-        struct LanguageSetting: Content, Equatable {
+        public struct LanguageSetting: Content, Equatable {
             let enable: Bool
             let interpreters: [Interpreter]?
             
@@ -221,20 +244,20 @@ public struct Meeting: Content {
             }
         }
         
-        enum RegistrationType: Int, Content {
+        public enum RegistrationType: Int, Content {
             case registerOnce = 1
             case registerEach = 2
             case registerOnceAndSelect = 3
         }
         
         
-        enum ApprovalType: Int, Content {
+        public enum ApprovalType: Int, Content {
             case automatic = 1
             case manual = 2
             case none = 3
         }
         
-        struct CountrySetting: Content, Equatable {
+        public struct CountrySetting: Content, Equatable {
             let enable: Bool
             let countries: [String]?
             let method: AllowMethod?
@@ -244,11 +267,11 @@ public struct Meeting: Content {
             }
         }
         
-        enum RecordingType: String, Content {
+        public enum RecordingType: String, Content {
             case local, cloud, none
         }
         
-        struct BreakoutRoomSetting: Content, Equatable {
+        public struct BreakoutRoomSetting: Content, Equatable {
             let enable: Bool
             let rooms: [BreakoutRoom]?
             
@@ -258,17 +281,17 @@ public struct Meeting: Content {
             }
         }
         
-        enum Audio: String, Content {
+        public enum Audio: String, Content {
             case both, telephony, voip
         }
         
-        struct AuthenticationException: Content, Equatable {
+        public struct AuthenticationException: Content, Equatable {
             let email: String
             let name: String
         }
     }
     
-    struct TrackingField: Content, Equatable {
+    public struct TrackingField: Content, Equatable {
         let field: String
         let value: String
         let visible: Bool

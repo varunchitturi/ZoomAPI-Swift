@@ -24,7 +24,7 @@ open class ZoomClient {
     }()
     
     let requestEncoder: JSONEncoder = {
-        let encoder  = JSONEncoder()
+        let encoder = JSONEncoder()
         encoder.keyEncodingStrategy = .convertToSnakeCase
         encoder.dateEncodingStrategy = .iso8601
         return encoder
@@ -62,7 +62,7 @@ open class ZoomClient {
         return response
     }
     
-    func post<T: Encodable, U: Decodable>(_ url: URI, content: T, decoding decodable: U.Type, contentType: HTTPMediaType, credentials: BearerTokenSet,  beforeSend: (inout ClientRequest) throws -> Void = {_ in }) async throws -> U {
+    func post<T: Encodable, U: Decodable>(_ url: URI, content: T, contentType: HTTPMediaType, decoding decodable: U.Type, credentials: BearerTokenSet,  beforeSend: (inout ClientRequest) throws -> Void = {_ in }) async throws -> U {
         let response = try await post(url, content: content, contentType: contentType, credentials: credentials) { req in
             try beforeSend(&req)
         }
