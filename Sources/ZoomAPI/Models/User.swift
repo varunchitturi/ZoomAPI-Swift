@@ -9,11 +9,17 @@ import Foundation
 import Vapor
 
 public struct UserInfo: Content {
+    /// Email address of the user.
     let email: String
+    /// First name of the user.
     let firstName: String?
+    /// Last name of the user.
     let lastName: String?
+    /// Display name of the user.
     let displayName: String?
+    /// Password of the user.
     let password: String
+    /// The account type of the user
     let type: User.UserType
 }
 
@@ -25,6 +31,7 @@ public struct User: Content {
         case none = 99
     }
     
+    /// The user's login method:
     public enum LoginType: Int, Content {
         case facebookOAuth = 0
         case googleOAuth = 1
@@ -60,35 +67,64 @@ public struct User: Content {
     }
     
     let id: String
+    /// Department of the user.
     var dept: String?
+    /// Email address of the user.
     var email: String
+    /// First name of the user.
     var firstName: String?
+    /// Last name of the user.
     var lastName: String?
+    /// Time when the user last logged in.
     let lastLoginTime: Date?
+    /// The last version of the Zoom client used by the user.
     let lastClientVersion: String?
+    /// Personal Meeting Identifier of the user.
     let pmi: Int?
+    /// Role name of the user.
     var roleName: String?
+    /// Timezone of the user.
     let timezone: String?
+    /// Type of user.
     var type: UserType
+    /// Indicates if PMI is used by the user.
     var usePmi: Bool?
+    /// Display name of the user.
     var displayName: String
+    /// Account identifier of the user.
     let accountId: String?
+    /// Account number of the user.
     let accountNumber: Int?
+    /// Company of the user.
     let company: String?
+    /// Time when the user was created.
     let userCreatedAt: Date?
+    /// Job title of the user.
     var jobTitle: String?
+    /// Language of the user.
     let language: String?
+    /// Location of the user.
     let location: String?
+    /// Array of login types used by the user.
     let loginTypes: [LoginType]?
+    /// Personal meeting URL of the user.
     let personalMeetingUrl: URL?
+    /// Array of phone numbers for the user.
     var phoneNumbers: [PhoneNumber]?
+    /// Profile picture URL of the user.
     let picUrl: URL?
+    /// Pronouns of the user.
     var pronouns: String?
+    /// Option to display pronouns of the user.
     var pronounsOption: PronounDisplayOption?
+    /// Role identifier of the user.
     let roleId: String?
+    /// Status of the user.
     let status: Status
+    /// Vanity URL of the user.
     let vanityUrl: URL?
-    let verified: Int
+    /// Verified flag of the user.
+    let verified: Int?
 }
 
 public enum UserCreateAction: String, Content {
