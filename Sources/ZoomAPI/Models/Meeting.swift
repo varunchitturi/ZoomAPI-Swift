@@ -90,10 +90,15 @@ public struct Meeting: Content {
     }
     
     public enum MeetingType: Int, Content {
+        /// An instant meeting.
         case instant = 1
+        /// A scheduled meeting.
         case scheduled = 2
+        /// A recurring meeting with no fixed time.
         case recurringNoFixed = 3
+        /// PMI Meeting
         case personal = 4
+        /// A recurring meeting with fixed time.
         case recurringFixed = 8
     }
     
@@ -103,14 +108,37 @@ public struct Meeting: Content {
     }
     
     struct Recurrence: Content, Equatable {
-        var endTime: Date
+        /// The final date on which the meeting will recur before it is canceled.
+        /// - Note: Should be in UTC time, such as `2017-11-25T12:00:00Z`.
+        /// - Warning: Cannot be used with `endTimes`
+        var endDateTime: Date
+        /// Select how many times the meeting should recur before it is canceled.
+        /// - Warning: Cannot be used with `endDateTime`
         var endTimes: Int
+        /// The day of each month the meeting should recur.
+        /// - For instance, if you would like the meeting to recur on 23rd of each month, provide 23 as the value of this field and 1 as the value of the `repeatInterval` field. Instead, if you would like the meeting to recur every three months, on 23rd of the month, change the value of the `repeatInterval` field to `3`.
+        /// - Note: Use this field only if you are scheduling a recurring meeting of type `monthly`
         var monthlyDay: Int
+        /// The week in each month the meeting should recur.
+        /// - Note: If you use this field, you must also use the `monthlyWeekDay` field to state the day of the week when the meeting should recur.
+        /// - Note: Use this field only if you are scheduling a recurring meeting of type `monthly`
         var monthlyWeek: Int
+        /// The day in the week in every month this meeting should recur.
+        /// - Note: If you use this field, you must also use the `monthlyWeek` field to state the week when the meeting should recur.
+        /// - Note: Use this field only if you are scheduling a recurring meeting of type `monthly`
+        var monthlyWeekDay: Int
+        /// Define the interval at which the meeting should recur.
+        /// - For instance, if you would like to schedule a meeting that recurs every two months, you must set the value of this field as `2` and the value of the type parameter as `monthly`.
+        /// - Note: For a daily meeting, the maximum interval you can set is 90 days. For a weekly meeting the maximum interval that you can set is of 12 weeks.
+        /// - Note: For a monthly meeting, there is a maximum of 3 months.
         var repeatInterval: Int
+        /// Recurrence meeting type
         var type: RecurrenceType
+    
         private var weeklyDays: String
         
+        /// Which day(s) of the week the meeting should repeat.
+        /// - Note: This field is required if you're scheduling a recurring meeting of type `weekly`
         var weeklyDayList: Set<WeekDay> {
             get {
                 var days = Set<WeekDay>()
@@ -325,7 +353,7 @@ public struct Meeting: Content {
             
             struct BreakoutRoom: Content, Equatable {
                 let name: String
-                let participant: [String]
+                let participants: [String]
             }
         }
         
