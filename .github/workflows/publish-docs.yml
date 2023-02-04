@@ -25,9 +25,9 @@ jobs:
                     -destination 'generic/platform=iOS';
                   $(xcrun --find docc) process-archive \
                     transform-for-static-hosting /tmp/docbuild/Build/Products/Debug-iphoneos/ZoomAPI.doccarchive \
-                    --hosting-base-path ZoomAPI \
+                    --hosting-base-path ZoomAPI-Swift \
                     --output-path docs;
-                  echo "<script>window.location.href += \"/documentation/ZoomAPI\"</script>" > docs/index.html;
+                  echo "<script>window.location.href += \"/documentation/zoomapi\"</script>" > docs/index.html;
             - name: Upload artifact
               uses: actions/upload-pages-artifact@v1
               with:
