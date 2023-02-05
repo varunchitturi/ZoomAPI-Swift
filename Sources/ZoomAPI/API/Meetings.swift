@@ -65,7 +65,7 @@ extension ZoomClient {
             - if fails to retrieve the meetings, it throws an error.
         - Throws:
             - `AbortError`: If the API returns an error.
-            - `DecodingError` if the server response could not be decoded into `Meeting` and `MeetingInfo` model.
+            - `DecodingError` if the server response could not be decoded.
      */
     public func listMeetings(_ credentials: BearerTokenSet, filteredBy status: Meeting.Status = .scheduled, pageSize: Int = 30, nextPageToken: String? = nil, pageNumber: Int? = nil, userId: String = "me") async throws -> (meetings: [MeetingInfo], nextPageToken: String?) {
         
